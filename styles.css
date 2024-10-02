@@ -1,0 +1,113 @@
+/* Header styling */
+body {
+    font-family: Arial, sans-serif;
+    margin: 50px;
+}
+
+h1 {
+    font-size: 3em;
+    color: blue; /* Fakebook in blue */
+    text-align: left;
+}
+
+h2 {
+    font-size: 2em;
+    color: black;
+    text-align: left;
+    background-color: lightblue; /* Blue background */
+    padding: 10px;
+    width: 100%; /* Full width */
+    box-sizing: border-box;
+    margin: 0;
+    display: inline-block;
+}
+
+.search-bar {
+    float: right;
+    margin-top: 10px;
+}
+
+.search-bar input[type="text"] {
+    padding: 10px;
+    font-size: 1em;
+    border: none; /* Removed the border */
+    border-radius: 4px;
+    width: 200px;
+}
+
+.search-bar input[type="submit"] {
+    padding: 10px 20px;
+    font-size: 1em;
+    border: none;
+    background-color: blue;
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.login-box {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background-color: black;
+    color: white;
+    padding: 10px 20px;
+    font-size: 1em;
+    border-radius: 5px;
+    text-align: center;
+}
+
+.login-box a {
+    color: white;
+    text-decoration: none;
+}
+
+header {
+    background-color: #f4f4f4;
+    text-align: center;
+    padding: 1rem;
+}
+
+h1 {
+    margin: 0;
+}
+
+/* Footer styling */
+footer {
+    background-color: #f4f4f4;
+    text-align: center;
+    padding: 1rem;
+    margin-top: auto; /* Pushes footer to the bottom */
+}
+
+/* Grid container */
+.image-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); /* 4 columns */
+    gap: 20px;
+    padding: 20px;
+    justify-items: center; /* Center items horizontally */
+    text-align: center; /* Center text below images */
+}
+
+/* Individual image styling */
+.image-item {
+    border: 2px solid lightblue; /* Light blue border around each item */
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.1); /* Optional shadow */
+    width: 100%;
+    max-width: 200px; /* Max width for the images */
+}
+
+.image-item img {
+    width: 100%; /* Make image responsive */
+    height: auto;
+    display: block;
+}
+
+.image-item p {
+    margin: 10px 0 0;
+    font-size: 1rem;
+    color: #333;
+}
