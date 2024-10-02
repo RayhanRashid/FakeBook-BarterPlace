@@ -111,3 +111,60 @@ footer {
     font-size: 1rem;
     color: #333;
 }
+
+/* styling for the textboxes*/
+input[type="text"], input[type="password"] {
+    width: 100%; 
+    padding: 12px 20px; 
+    margin: 8px; 
+    display: inline-block;
+    border: 1px solid #ccc; 
+    border-radius: 4px; 
+    box-sizing: border-box; 
+    font-size: 16px; 
+    background-color: #f9f9f9;
+}
+
+/* styling for focus(when typing) */
+input[type="text"]:focus, input[type="password"]:focus {
+    border-color: #46b0c8; 
+    background-color: #fff; 
+    outline: none;
+}
+
+/* styling for the submit button*/
+.submit-modal{
+    width: 100%;
+    display: inclined-block;
+    background-color: #5dbbd4; 
+    color: white;
+    padding: 14px 2px; 
+    margin: 4px;
+    border: none; 
+    border-radius: 4px; 
+    cursor: pointer; 
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+    text-align: center;
+}
+
+/* When hovering over the submit */
+.submit-modal:hover {
+    background-color: #2e829e;
+}
+
+/* the modal styling */
+dialog {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 1);
+    width: 30%;
+    padding: 20px;
+}
+
+/* Style the close button */
+.close {
+    float: right;
+    font-size: 20px;
+    cursor: pointer;
+}

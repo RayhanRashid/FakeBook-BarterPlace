@@ -20,9 +20,9 @@
         </div>
     </div>
 
-    <div class="login-box">
-        <a href="/login">log in</a>
-    </div>
+    <button class="login-box" href="javascript:void(0)" id="login_button">
+        log in
+    </button>
 
     <main>
         <section class="image-grid">
@@ -77,8 +77,40 @@
         </section>
     </main>
 
+    <!-- Dialog for Login -->
+    <dialog id="login_dialog">
+        <span class="close" id="close_button_login">&times;</span>
+        <h2>Login</h2><br><br>
+        <form method="dialog">
+            <label for="username" id="username_text">Username:</label><br>
+            <input type="text" id="username_input"><br>
+            <label for="password">Password:</label><br>
+            <input type="password" id="password"><br><br>
+            <input type="submit" value="Login" class="submit-modal"><br><br>
+            <label for="text">Don't Have an Account? <a href="javascript:void(0)" id="register_link">Register Here!</a></label>
+
+            
+        </form>
+    </dialog>
+
+    <!-- Dialog for Register -->
+    <dialog id="register_dialog">
+        <span class="close" id="close_button_register">&times;</span>
+        <h2>Register</h2><br><br>
+        <form method="dialog">
+            <label for="username" id="username_text">Username:</label><br>
+            <input type="text" id="username_input"><br>
+            <label for="password">Password:</label><br>
+            <input type="password" id="password"><br><br>
+            <label for="password">Re-enter Password:</label><br>
+            <input type="password" id="password"><br><br>
+            <input type="submit" value="Register" class="submit-modal"><br>
+            
+            
+        </form>
+    </dialog>
 
 
-
+<script src="functions.js"></script>
 </body>
 </html>
