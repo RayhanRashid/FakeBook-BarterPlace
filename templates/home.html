@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Home</title>
+</head>
+<body>
+<h2>Welcome to the Home Page</h2>
+
+<!-- Display Flash Messages Here -->
+{% with messages = get_flashed_messages(with_categories=True) %}
+{% if messages %}
+<ul>
+  {% for category, message in messages %}
+  <li class="{{ category }}">{{ message }}</li>
+  {% endfor %}
+</ul>
+{% endif %}
+{% endwith %}
+
+<!-- Show welcome message if user is logged in -->
+{% if username %}
+<h3>Welcome, {{ username }}!</h3>
+<form method="POST" action="/logout">
+  <input type="submit" value="Logout">
+</form>
+{% else %}
+<div id="register">
+  <h3>Register</h3>
+  <form method="POST" action="/register">
+    <label for="username">Username:</label><br>
+    <input type="text" id="username" name="username" required><br>
+    <label for="password1">Password:</label><br>
+    <input type="password" id="password1" name="password1" required><br>
+    <label for="password2">Confirm Password:</label><br>
+    <input type="password" id="password2" name="password2" required><br><br>
+    <input type="submit" value="Register">
+  </form>
+</div>
+
+<div id="login">
+  <h3>Login</h3>
+  <form method="POST" action="/login">
+    <label for="username">Username:</label><br>
+    <input type="text" id="username" name="username" required><br>
+    <label for="password">Password:</label><br>
+    <input type="password" id="password" name="password" required><br><br>
+    <input type="submit" value="Login">
+  </form>
+</div>
+{% endif %}
+</body>
+</html>
