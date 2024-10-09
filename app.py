@@ -34,6 +34,12 @@ def generate_auth_token():
 def check_token(token, token_hash):
     return hashlib.sha256(token.encode()).hexdigest() == token_hash
 
+# Add 'X-Content-Type-Options: nosniff' header to all responses
+@app.after_request
+def add_security_headers(response):
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    return response
+
 # Route for the home page
 # Registration route
 @app.route('/register', methods=['POST'])
