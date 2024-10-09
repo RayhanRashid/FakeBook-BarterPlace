@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Post Item</title>
+    <link rel="stylesheet" href="postStyles.css">
+</head>
+<body>
+
+<header>
+    <h1>Post Your Item</h1>
+</header>
+
+<main>
+    <form class="post-item-form" action="/post-item" method="POST" enctype="multipart/form-data">
+        <h2>Post a New Item</h2>
+        
+        <label for="item-name">Name of Item:</label>
+        <input type="text" id="item-name" name="item-name" required>
+        
+        <label for="item-price">Price of Item:</label>
+        <input type="number" id="item-price" name="item-price" step="0.01" required>
+
+        <label for="item-description">Description of Item:</label>
+        <textarea id="item-description" name="item-description" required></textarea>
+
+        <label for="item-image">Upload Image:</label>
+        <input type="file" id="item-image" name="item-image" accept="image/*" required>
+
+        <button type="submit" class="submit-btn">Post Item</button>
+    </form>
+</main>
+
+<footer>
+    <p>&copy; 2024 FakeBook Barterplace. All rights reserved.</p>
+</footer>
+
+</body>
+</html>
