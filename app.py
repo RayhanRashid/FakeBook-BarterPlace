@@ -41,58 +41,63 @@ def add_security_headers(response):
     return response
 
 # Route for the home page
-# Registration route
-@app.route('/register', methods=['POST'])
+@app.route('/register', methods=['GET', 'POST'])
 def register():
-    username = request.form['username']
-    password1 = request.form['password1']
-    password2 = request.form['password2']
+    if request.method == 'POST':
+        username = request.form['username']
+        password1 = request.form['password1']
+        password2 = request.form['password2']
 
-    if users_collection.find_one({"username": username}):
-        flash('Username already exists.', 'error')
-        return redirect(url_for('home'))
+        if users_collection.find_one({"username": username}):
+            flash('Username already exists.', 'error')
+            return redirect(url_for('register'))
 
-    if password1 != password2:
-        flash('Passwords do not match.', 'error')
-        return redirect(url_for('home'))
+        if password1 != password2:
+            flash('Passwords do not match.', 'error')
+            return redirect(url_for('register'))
 
-    if len(password1) < 12:
-        flash('Password must be at least 12 characters long.', 'error')
-        return redirect(url_for('home'))
+        if len(password1) < 12:
+            flash('Password must be at least 12 characters long.', 'error')
+            return redirect(url_for('register'))
 
-    hashed_password = hash_password(password1)
-    users_collection.insert_one({"username": username, "password": hashed_password})
+        hashed_password = hash_password(password1)
+        users_collection.insert_one({"username": username, "password": hashed_password})
 
-    flash('Registration successful! Please log in.', 'success')
-    return redirect(url_for('home'))
+        flash('Registration successful! Please log in.', 'success')
+        return redirect(url_for('login'))
 
-# Login route
-@app.route('/login', methods=['POST'])
+    return render_template('register.html')  # Render the registration form
+
+
+@app.route('/login', methods=['GET', 'POST'])
 def login():
-    username = request.form['username']
-    password = request.form['password']
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
 
-    user = users_collection.find_one({"username": username})
+        user = users_collection.find_one({"username": username})
 
-    if user and check_password(user['password'], password):
-        token, token_hash = generate_auth_token()
-        tokens_collection.insert_one({"username": username, "token_hash": token_hash, "expires_at": datetime.utcnow() + timedelta(hours=1)})
+        if user and check_password(user['password'], password):
+            token, token_hash = generate_auth_token()
+            tokens_collection.insert_one({"username": username, "token_hash": token_hash, "expires_at": datetime.utcnow() + timedelta(hours=1)})
 
-        resp = make_response(redirect(url_for('home')))
-        resp.set_cookie('auth_token', token, httponly=True, max_age=60*60)
-        resp.set_cookie('username', username)
+            resp = make_response(redirect(url_for('home')))
+            resp.set_cookie('auth_token', token, httponly=True, max_age=60*60)
+            resp.set_cookie('username', username)
 
-        flash('Login successful!', 'success')
-        return resp
-    else:
-        flash('Invalid username or password.', 'error')
-        return redirect(url_for('home'))
+            return resp
+        else:
+            flash('Invalid username or password.', 'error')
+            return redirect(url_for('login'))
+
+    return render_template('login.html')  # Render the login form
+
 
 # Route for the home page
 @app.route('/')
 def home():
     username = request.cookies.get('username')
-    return render_template('home.html', username=username)
+    return render_template('index.html', username=username)
 # Logout route
 @app.route('/logout', methods=['POST'])
 def logout():
@@ -101,6 +106,7 @@ def logout():
     resp.set_cookie('username', '', expires=0)  # Clear the username cookie
     flash('You have been logged out.', 'success')
     return resp
+@app.route('/register')
 
 
 # Middleware to check authentication
@@ -120,10 +126,13 @@ def authenticated():
 # Ensure that user is authenticated
 @app.before_request
 def check_authentication():
-    if request.path != '/' and request.path != '/login' and request.path != '/register':
+    if request.path.startswith('/static'):
+        return  # Allow static files to load without authentication
+
+    if request.path not in ['/', '/login', '/register']:
         if not authenticated():
             flash('You must be logged in to view this page.')
-            return redirect(url_for('home'))
+            return redirect(url_for('index'))
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True)
