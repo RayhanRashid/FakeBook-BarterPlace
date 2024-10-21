@@ -64,7 +64,7 @@ def register():
         users_collection.insert_one({"username": username, "password": hashed_password})
 
         flash('Registration successful! Please log in.', 'success')
-        return redirect(url_for('login'))
+        return redirect(url_for('home'))
 
     return render_template('register.html')  # Render the registration form
 
@@ -88,7 +88,7 @@ def login():
             return resp
         else:
             flash('Invalid username or password.', 'error')
-            return redirect(url_for('login'))
+            return redirect(url_for('home'))
 
     return render_template('login.html')  # Render the login form
 

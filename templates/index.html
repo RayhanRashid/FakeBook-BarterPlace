@@ -19,19 +19,27 @@
         </div>
     </div>
 
-    <!-- Show welcome message if user is logged in -->
+    <!-- Show welcome message and log out button if user is logged in -->
+    {% with messages = get_flashed_messages(with_categories=True) %}
+        {% if messages %}
+            <ul>
+                {% for category, message in messages %}
+                    <li class="{{ category }}">{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
     {% if username %}
         <h3>Welcome, {{ username }}!</h3>
         <form method="POST" action="/logout">
-            <input type="submit" value="Logout">
+            <input type="submit" value="Logout" class="login-box">
         </form>
+    <!-- Show register and login buttons if not logged in -->
     {% else %}
-        <a href="{{ url_for('register') }}">
-            <button type="button">Register</button>
-        </a>
-        <a href="{{ url_for('login') }}">
-            <button type="button">Login</button>
-        </a>
+        <button class="login-box" href="javascript:void(0)" id="login_button">
+            Login
+        </button>
+
     {% endif %}
 
     <main>
@@ -91,11 +99,11 @@
     <dialog id="login_dialog">
         <span class="close" id="close_button_login">&times;</span>
         <h2>Login</h2><br><br>
-        <form method="dialog">
+        <form action="{{ url_for('login') }}" method="POST">
             <label for="username" id="username_text">Username:</label><br>
-            <input type="text" id="username_input"><br>
+            <input type="text" id="username_input" name="username" required><br>
             <label for="password">Password:</label><br>
-            <input type="password" id="password"><br><br>
+            <input type="password" id="password" name="password" required><br><br>
             <input type="submit" value="Login" class="submit-modal"><br><br>
             <label for="text">Don't Have an Account? <a href="javascript:void(0)" id="register_link">Register Here!</a></label>
 
@@ -107,13 +115,13 @@
     <dialog id="register_dialog">
         <span class="close" id="close_button_register">&times;</span>
         <h2>Register</h2><br><br>
-        <form method="dialog">
+        <form action="{{ url_for('register') }}" method="POST">
             <label for="username" id="username_text">Username:</label><br>
-            <input type="text" id="username_input"><br>
+            <input type="text" id="username_input" name="username" required><br>
             <label for="password">Password:</label><br>
-            <input type="password" id="password"><br><br>
+            <input type="password" id="password" name="password1"><br><br>
             <label for="password">Re-enter Password:</label><br>
-            <input type="password" id="password"><br><br>
+            <input type="password" id="password" name="password2"><br><br>
             <input type="submit" value="Register" class="submit-modal"><br>
             
             
