@@ -186,3 +186,14 @@ dialog {
     border:none;
     cursor: pointer;
 }
+
+/* Like button styling */
+.like-button {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+}
+.like-button.liked {
+    color: red; 
+}

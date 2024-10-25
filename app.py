@@ -17,7 +17,18 @@ users_collection = db['users']  # Collection for storing user data
 tokens_collection = db['tokens']  # Collection for storing authentication tokens
 items_collection = db['itmes'] #Collection for storing item posts
 
-
+"""
+likes collection:
+    {   
+        "item_id": 1, 
+        "likes": [ 
+            User1,
+            User2,
+            ... 
+        ]    
+    }
+"""
+likes_collection = db["liked"]
 
 # Bcrypt setup for password hashing
 def hash_password(password):
@@ -41,6 +52,53 @@ def check_token(token, token_hash):
 def add_security_headers(response):
     response.headers['X-Content-Type-Options'] = 'nosniff'
     return response
+
+@app.route('/like', methods=['POST'])
+def like_post():
+    # Check if user is authenticated
+    if not authenticated():
+        flash('You must be logged in to like this post.')
+        return jsonify({"error": "You must be logged in to like this post."}), 403    # place holder
+    
+    #Get item_id and username
+    data = request.get_json()
+    item_id = data.get("item_id")
+    username = request.cookies.get('username')
+    
+    if not item_id or not username:
+        if not authenticated():
+            flash('You must be logged in to like this post.')
+            return redirect(url_for('home'))
+    
+    # Check if item_id is in likes collection
+    item = likes_collection.find_one({"item_id": item_id})
+    if item:
+        likes_set = item["likes"]
+        if username in likes_set:
+            # Remove user 
+            likes_collection.update_one(
+                {"item_id": item_id}, 
+                {'$pull': {"likes": username}}
+            )
+            like_status = "unliked"
+        else:
+            # Add user
+            likes_collection.update_one(
+            {"item_id": item_id}, 
+            {'$addToSet': {"likes": username}}  
+             )
+            like_status = "liked"
+    else:
+        # Insert item_id with liked user
+        likes_collection.insert_one({
+            "item_id": item_id,
+            "likes": [username]
+        })
+        like_status = "liked"
+
+    updated_item = likes_collection.find_one({"item_id": item_id})
+    return jsonify({"status": like_status, "like_count": len(updated_item["likes"]) if updated_item else 0})
+
 
 # Route for the home page
 @app.route('/register', methods=['GET', 'POST'])

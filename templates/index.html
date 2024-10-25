@@ -59,6 +59,19 @@
                     <img src="{{ item['item_image'] }}" alt="{{ item['item_name'] }}">
                     <p>{{ item['item_name'] }}</p>
                     <p>${{item['item_price']}}</p>
+                     <!-- Like Button -->
+                    <button class="like-button {% if username and username in item.get('likes', []) %}liked{% endif %}" 
+                        data-item-id="{{ item['item_id'] }}" onclick="toggleLike(this)">
+                         ❤️
+                    </button>
+                    <p id="like-status-{{ item['item_id'] }}">
+                        {% if username and username in item.get('likes', []) %}
+                            You've liked this post
+                        {% else %}
+                            Like this post
+                        {% endif %}
+                    </p>
+                    <p>Likes: <span id="like-count-{{ item['item_id'] }}">{{ item.get('likes', []) | length }}</span></p>
                 </div>
             {% endfor %}
         </section>
