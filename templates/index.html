@@ -41,57 +41,26 @@
         </button>
 
     {% endif %}
-
+    
+    
+    {% if username %}
+        <form method="POST" action="/post-item">
+            <input type="image" src="/static/images/post-button.png" alt="Post Button" class="post-item">
+        </form>
+    {% else %}
+        <input type="image" src="/static/images/post-button.png" alt="Post Button Unlogged" class="post-item" id="unlogged-post">
+    {% endif %}
+    
+    
     <main>
         <section class="image-grid">
-            <div class="image-item">
-                <img src="{{ url_for('static', filename='images/testImage.jpg') }}" alt="Item 1">
-                <p>Item Name 1</p>
-            </div>
-            <div class="image-item">
-                <img src="{{ url_for('static', filename='images/testImage.jpg') }}" alt="Item 2">
-                <p>Item Name 2</p>
-            </div>
-            <div class="image-item">
-                <img src="{{ url_for('static', filename='images/testImage.jpg') }}" alt="Item 3">
-                <p>Item Name 3</p>
-            </div>
-            <div class="image-item">
-                <img src="{{ url_for('static', filename='images/testImage.jpg') }}" alt="Item 4">
-                <p>Item Name 4</p>
-            </div>
-            <div class="image-item">
-                <img src="{{ url_for('static', filename='images/testImage.jpg') }}" alt="Item 5">
-                <p>Item Name 5</p>
-            </div>
-            <div class="image-item">
-                <img src="{{ url_for('static', filename='images/testImage.jpg') }}" alt="Item 6">
-                <p>Item Name 6</p>
-            </div>
-            <div class="image-item">
-                <img src="{{ url_for('static', filename='images/testImage.jpg') }}" alt="Item 7">
-                <p>Item Name 7</p>
-            </div>
-            <div class="image-item">
-                <img src="{{ url_for('static', filename='images/testImage.jpg') }}" alt="Item 8">
-                <p>Item Name 8</p>
-            </div>
-            <div class="image-item">
-                <img src="{{ url_for('static', filename='images/testImage.jpg') }}" alt="Item 9">
-                <p>Item Name 9</p>
-            </div>
-            <div class="image-item">
-                <img src="{{ url_for('static', filename='images/testImage.jpg') }}" alt="Item 10">
-                <p>Item Name 10</p>
-            </div>
-            <div class="image-item">
-                <img src="{{ url_for('static', filename='images/testImage.jpg') }}" alt="Item 11">
-                <p>Item Name 11</p>
-            </div>
-            <div class="image-item">
-                <img src="{{ url_for('static', filename='images/testImage.jpg') }}" alt="Item 12">
-                <p>Item Name 12</p>
-            </div>
+            {% for item in items %}
+                <div class="image-item">
+                    <img src="{{ item['item_image'] }}" alt="{{ item['item_name'] }}">
+                    <p>{{ item['item_name'] }}</p>
+                    <p>${{item['item_price']}}</p>
+                </div>
+            {% endfor %}
         </section>
     </main>
 
@@ -99,14 +68,13 @@
     <dialog id="login_dialog">
         <span class="close" id="close_button_login">&times;</span>
         <h2>Login</h2><br><br>
-        <form action="{{ url_for('login') }}" method="POST">
+        <form action="/login" method="POST">
             <label for="username" id="username_text">Username:</label><br>
             <input type="text" id="username_input" name="username" required><br>
             <label for="password">Password:</label><br>
             <input type="password" id="password" name="password" required><br><br>
             <input type="submit" value="Login" class="submit-modal"><br><br>
-            <label for="text">Don't Have an Account? <a href="javascript:void(0)" id="register_link">Register Here!</a></label>
-
+            <label for="text">Don\'t Have an Account? <a href="javascript:void(0)" id="register_link">Register Here!</a></label>
             
         </form>
     </dialog>
@@ -115,7 +83,7 @@
     <dialog id="register_dialog">
         <span class="close" id="close_button_register">&times;</span>
         <h2>Register</h2><br><br>
-        <form action="{{ url_for('register') }}" method="POST">
+        <form action="/register" method="POST">
             <label for="username" id="username_text">Username:</label><br>
             <input type="text" id="username_input" name="username" required><br>
             <label for="password">Password:</label><br>
@@ -124,11 +92,10 @@
             <input type="password" id="password" name="password2"><br><br>
             <input type="submit" value="Register" class="submit-modal"><br>
             
-            
         </form>
     </dialog>
 
 
-    <script src="{{ url_for('static', filename='js/functions.js') }}"></script>
+    <script src="static/js/functions.js"></script>
 </body>
 </html>

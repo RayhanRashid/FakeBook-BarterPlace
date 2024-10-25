@@ -3,6 +3,7 @@ import os
 import hashlib
 from flask import Flask, request, redirect, url_for, render_template, make_response, flash, jsonify
 from pymongo import MongoClient
+from werkzeug.utils import secure_filename
 from datetime import datetime, timedelta
 import secrets
 
@@ -14,6 +15,7 @@ client = MongoClient('mongodb://mongo:27017/')
 db = client['flask_auth']  # Database
 users_collection = db['users']  # Collection for storing user data
 tokens_collection = db['tokens']  # Collection for storing authentication tokens
+items_collection = db['itmes'] #Collection for storing item posts
 
 
 
@@ -96,8 +98,13 @@ def login():
 # Route for the home page
 @app.route('/')
 def home():
+    print(users_collection)
+    print("  ")
+    print(tokens_collection)
+    items = items_collection.find()
     username = request.cookies.get('username')
-    return render_template('index.html', username=username)
+    return render_template('index.html', username=username, items=items)
+
 # Logout route
 @app.route('/logout', methods=['POST'])
 def logout():
@@ -129,10 +136,66 @@ def check_authentication():
     if request.path.startswith('/static'):
         return  # Allow static files to load without authentication
 
-    if request.path not in ['/', '/login', '/register']:
+    if request.path not in ['/', '/login', '/register','/logout','/post-item', '/post-and-store-item']:
         if not authenticated():
             flash('You must be logged in to view this page.')
-            return redirect(url_for('index'))
+            return redirect(url_for('home'))
+
+
+@app.route('/post-item', methods=['GET', 'POST'])
+def post_item():
+    return render_template('postpage/post.html')
+
+@app.route('/post-and-store-item', methods=['POST'])
+def post_and_store_item():
+    last_item = items_collection.find_one(sort=[("item_id", -1)])
+    if last_item:
+        item_id = last_item['item_id'] + 1
+    else:
+        item_id = 1
+
+    if 'item-image' not in request.files:
+        flash('No file found')
+        return redirect(url_for('home'))
+    
+    img_file = request.files['item-image']
+
+    if img_file.filename == '':
+        flash('No selected file')
+        return redirect(url_for('home'))
+    
+    if img_file and allowed_image_files(img_file.filename): 
+        filename = secure_filename(img_file.filename)
+        item_picture_path = os.path.join('static/images', filename)
+        img_file.save(item_picture_path)
+
+    item_name = request.form['item-name']
+    item_price = request.form['item-price']
+    item_description = request.form['item-description']
+
+    items_collection.insert_one({"item_id": item_id, "item_name": item_name, "item_price": item_price, "item_description": item_description, "item_image": item_picture_path})
+
+    return redirect(url_for('home'))
+
+
+def allowed_image_files(filename):
+    allowed_image_file_extensions = {'png', 'jpg', 'jpeg', 'gif'}
+    extension_exist = False
+    extension_fits = False
+    if '.' in filename:
+        extension_exist = True
+
+    if filename.rsplit('.',1)[1].lower() in allowed_image_file_extensions:
+        extension_fits = True
+
+    if extension_exist and extension_fits:
+        return True
+    else:
+        return False
+
+
+        
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True)

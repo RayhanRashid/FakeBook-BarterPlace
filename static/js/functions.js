@@ -1,10 +1,15 @@
-var dialog = document.getElementById('login_dialog');
-var loginBtn = document.getElementById('login_button');
-var close_button_login = document.getElementById('close_button_login');
-var close_button_register = document.getElementById('close_button_register');
+let dialog = document.getElementById('login_dialog');
+let loginBtn = document.getElementById('login_button');
+let home_post_button = document.getElementById('unlogged-post')
+let close_button_login = document.getElementById('close_button_login');
+let close_button_register = document.getElementById('close_button_register');
 
 //show the modal when the login button is clicked
 loginBtn.onclick = function() {
+    dialog.showModal();
+}
+
+home_post_button.onclick = function(){
     dialog.showModal();
 }
 

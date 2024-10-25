@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Post Item</title>
-    <link rel="stylesheet" href="postStyles.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/postStyles.css') }}">
 </head>
 <body>
 
@@ -13,7 +13,7 @@
 </header>
 
 <main>
-    <form class="post-item-form" action="/post-item" method="POST" enctype="multipart/form-data">
+    <form class="post-item-form" action="/post-and-store-item" method="POST" enctype="multipart/form-data">
         <h2>Post a New Item</h2>
         
         <label for="item-name">Name of Item:</label>

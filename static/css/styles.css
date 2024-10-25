@@ -55,6 +55,7 @@ h2 {
     font-size: 1em;
     border-radius: 5px;
     text-align: center;
+    cursor: pointer;
 }
 
 .login-box a {
@@ -166,5 +167,22 @@ dialog {
 .close {
     float: right;
     font-size: 20px;
+    cursor: pointer;
+}
+
+.posting{
+    display: inclined-block;
+}
+
+.post-item {
+    position: fixed;
+    width: 90px;
+    height: 90px;
+    right: 50px;
+    bottom: 40px;
+    background-image: url('/static/images/post-button.png');
+    background-size: cover; 
+    background-position: center;
+    border:none;
     cursor: pointer;
 }
