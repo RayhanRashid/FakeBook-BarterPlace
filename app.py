@@ -15,20 +15,8 @@ client = MongoClient('mongodb://mongo:27017/')
 db = client['flask_auth']  # Database
 users_collection = db['users']  # Collection for storing user data
 tokens_collection = db['tokens']  # Collection for storing authentication tokens
-items_collection = db['itmes'] #Collection for storing item posts
+items_collection = db['itmes'] # Collection for storing item posts and likes
 
-"""
-likes collection:
-    {   
-        "item_id": 1, 
-        "likes": [ 
-            User1,
-            User2,
-            ... 
-        ]    
-    }
-"""
-likes_collection = db["liked"]
 
 # Bcrypt setup for password hashing
 def hash_password(password):
@@ -55,50 +43,60 @@ def add_security_headers(response):
 
 @app.route('/like', methods=['POST'])
 def like_post():
-    # Check if user is authenticated
-    if not authenticated():
-        flash('You must be logged in to like this post.')
-        return jsonify({"error": "You must be logged in to like this post."}), 403    # place holder
-    
-    #Get item_id and username
-    data = request.get_json()
-    item_id = data.get("item_id")
-    username = request.cookies.get('username')
-    
-    if not item_id or not username:
-        if not authenticated():
-            flash('You must be logged in to like this post.')
+    try:
+        item_id = int(request.form['item_id'])
+        username = request.cookies.get('username')
+
+        if not username:
+            flash('You must be logged in to like a post.', 'error')
             return redirect(url_for('home'))
-    
-    # Check if item_id is in likes collection
-    item = likes_collection.find_one({"item_id": item_id})
-    if item:
-        likes_set = item["likes"]
-        if username in likes_set:
-            # Remove user 
-            likes_collection.update_one(
-                {"item_id": item_id}, 
-                {'$pull': {"likes": username}}
-            )
-            like_status = "unliked"
+
+        item = items_collection.find_one({"item_id": item_id})
+
+        if item and username not in item['likes']:
+            # add user to the likes list and increment the like count
+            items_collection.update_one({"item_id": item_id}, {"$push": {"likes": username}, "$inc": {"like_count": 1}})
+        elif item and username in item['likes']:
+            flash('You have already liked this post.', 'error')
+            return redirect(url_for('home'))
         else:
-            # Add user
-            likes_collection.update_one(
-            {"item_id": item_id}, 
-            {'$addToSet': {"likes": username}}  
-             )
-            like_status = "liked"
-    else:
-        # Insert item_id with liked user
-        likes_collection.insert_one({
-            "item_id": item_id,
-            "likes": [username]
-        })
-        like_status = "liked"
+            flash('Post not found.', 'error')
+            return redirect(url_for('home'))
 
-    updated_item = likes_collection.find_one({"item_id": item_id})
-    return jsonify({"status": like_status, "like_count": len(updated_item["likes"]) if updated_item else 0})
+        flash('Post liked!', 'success')
+        return redirect(url_for('home'))
+        
+    except Exception as e:
+        flash('An error occurred while liking the post.', 'error')
+        return redirect(url_for('home'))
+    
+@app.route('/unlike', methods=['POST'])
+def unlike_post():
+    try:
+        item_id = int(request.form['item_id'])
+        username = request.cookies.get('username')
 
+        if not username:
+            flash('You must be logged in to unlike a post.', 'error')
+            return redirect(url_for('home'))
+
+        item = items_collection.find_one({"item_id": item_id})
+
+        if item and username in item['likes']:
+            # remove user from the likes list and decrement the like count
+            items_collection.update_one({"item_id": item_id}, {"$pull": {"likes": username}, "$inc": {"like_count": -1}})
+        elif item and username not in item['likes']:
+            flash('You have not liked this post.', 'error')
+            return redirect(url_for('home'))
+        else:
+            flash('Post not found.', 'error')
+            return redirect(url_for('home'))
+
+        flash('Post unliked!', 'success')
+        return redirect(url_for('home'))
+    except Exception as e:
+        flash('An error occurred while unliking the post.', 'error')
+        return redirect(url_for('home'))
 
 # Route for the home page
 @app.route('/register', methods=['GET', 'POST'])
@@ -160,7 +158,7 @@ def home():
     print("  ")
     print(tokens_collection)
     items = items_collection.find()
-    username = request.cookies.get('username')
+    username = request.cookies.get('username', None)
     return render_template('index.html', username=username, items=items)
 
 # Logout route
@@ -171,7 +169,6 @@ def logout():
     resp.set_cookie('username', '', expires=0)  # Clear the username cookie
     flash('You have been logged out.', 'success')
     return resp
-@app.route('/register')
 
 
 # Middleware to check authentication
@@ -194,7 +191,7 @@ def check_authentication():
     if request.path.startswith('/static'):
         return  # Allow static files to load without authentication
 
-    if request.path not in ['/', '/login', '/register','/logout','/post-item', '/post-and-store-item']:
+    if request.path not in ['/', '/login', '/register','/logout','/post-item', '/post-and-store-item', '/like', '/unlike']:
         if not authenticated():
             flash('You must be logged in to view this page.')
             return redirect(url_for('home'))
@@ -231,7 +228,7 @@ def post_and_store_item():
     item_price = request.form['item-price']
     item_description = request.form['item-description']
 
-    items_collection.insert_one({"item_id": item_id, "item_name": item_name, "item_price": item_price, "item_description": item_description, "item_image": item_picture_path})
+    items_collection.insert_one({"item_id": item_id, "item_name": item_name, "item_price": item_price, "item_description": item_description, "item_image": item_picture_path, "likes": [], "like_count": 0})
 
     return redirect(url_for('home'))
 
