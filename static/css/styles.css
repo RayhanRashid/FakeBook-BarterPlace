@@ -189,11 +189,20 @@ dialog {
 
 /* Like button styling */
 .like-button {
-    background: none;
+    background-color: #5dbbd4;
+    color: white;
+    padding: 5px 10px; /* Adjust padding to be smaller */
+    margin-top: 20px;
     border: none;
-    font-size: 24px;
+    border-radius: 4px;
     cursor: pointer;
+    font-size: 16px; 
+    text-align: center;
+    width: auto; /* Adjust width to fit the content */
+    transition: background-color 0.3s ease;
+    display: inline-block; /* Ensure the button fits the content */
 }
-.like-button.liked {
-    color: red; 
+
+.like-button:hover {
+    background-color: #2e829e;
 }
