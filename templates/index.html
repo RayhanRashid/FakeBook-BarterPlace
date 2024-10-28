@@ -58,20 +58,23 @@
                 <div class="image-item">
                     <img src="{{ item['item_image'] }}" alt="{{ item['item_name'] }}">
                     <p>{{ item['item_name'] }}</p>
-                    <p>${{item['item_price']}}</p>
-                     <!-- Like Button -->
-                    <button class="like-button {% if username and username in item.get('likes', []) %}liked{% endif %}" 
-                        data-item-id="{{ item['item_id'] }}" onclick="toggleLike(this)">
-                         ❤️
-                    </button>
-                    <p id="like-status-{{ item['item_id'] }}">
-                        {% if username and username in item.get('likes', []) %}
-                            You've liked this post
-                        {% else %}
-                            Like this post
-                        {% endif %}
-                    </p>
-                    <p>Likes: <span id="like-count-{{ item['item_id'] }}">{{ item.get('likes', []) | length }}</span></p>
+                    <p>${{ item['item_price'] }}</p>
+
+                    <!--Like/Unlike Button-->
+                    {% if username and username in item['likes'] %}
+                        <form action="/unlike" method="POST" class="like-form">
+                            <input type="hidden" name="item_id" value="{{ item['item_id'] }}">
+                            <input type="submit" value="💔" class="like-button">
+                        </form>
+                    {% else %}
+                        <form action="/like" method="POST" class="like-form">
+                            <input type="hidden" name="item_id" value="{{ item['item_id'] }}">
+                            <input type="submit" value="❤️" class="like-button">
+                        </form>
+                    {% endif %}
+                    <p>Likes: {{ item["like_count"] }}</p>
+                    <!--End Like/Unlike Button-->
+
                 </div>
             {% endfor %}
         </section>
