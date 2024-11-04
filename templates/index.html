@@ -29,29 +29,26 @@
             </ul>
         {% endif %}
     {% endwith %}
-    {% if username %}
-        <h3>Welcome, {{ username }}!</h3>
+
+    {% if auth_username %}
+        <h3>Welcome, {{ auth_username }}!</h3>
         <form method="POST" action="/logout">
             <input type="submit" value="Logout" class="login-box">
         </form>
-    <!-- Show register and login buttons if not logged in -->
     {% else %}
-        <button class="login-box" href="javascript:void(0)" id="login_button">
-            Login
-        </button>
-
+        <button class="login-box" href="javascript:void(0)" id="login_button">Login</button>
     {% endif %}
-    
-    
-    {% if username %}
+
+    {% if auth_username %}
         <form method="POST" action="/post-item">
             <input type="image" src="/static/images/post-button.png" alt="Post Button" class="post-item">
         </form>
     {% else %}
         <input type="image" src="/static/images/post-button.png" alt="Post Button Unlogged" class="post-item" id="unlogged-post">
     {% endif %}
-    
-    
+
+
+
     <main>
         <section class="image-grid">
             {% for item in items %}
@@ -61,7 +58,7 @@
                     <p>${{ item['item_price'] }}</p>
 
                     <!--Like/Unlike Button-->
-                    {% if username and username in item['likes'] %}
+                    {% if auth_username and auth_username in item['likes'] %}
                         <form action="/unlike" method="POST" class="like-form">
                             <input type="hidden" name="item_id" value="{{ item['item_id'] }}">
                             <input type="submit" value="💔" class="like-button">

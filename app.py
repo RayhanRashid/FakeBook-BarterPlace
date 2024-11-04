@@ -3,6 +3,7 @@ import os
 import hashlib
 from flask import Flask, request, redirect, url_for, render_template, make_response, flash, jsonify
 from pymongo import MongoClient
+from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.utils import secure_filename
 from datetime import datetime, timedelta
 import secrets
@@ -16,7 +17,24 @@ db = client['flask_auth']  # Database
 users_collection = db['users']  # Collection for storing user data
 tokens_collection = db['tokens']  # Collection for storing authentication tokens
 items_collection = db['itmes'] # Collection for storing item posts and likes
+#client.drop_database('flask_auth')
 
+def get_username_from_token():
+    auth_token = request.cookies.get('auth_token')
+    if not auth_token:
+        return None
+
+    # Hash the auth_token to match the stored token_hash
+    hashed_token = hashlib.sha256(auth_token.encode()).hexdigest()
+
+    # Find the token data based on the hashed token value
+    token_data = tokens_collection.find_one({"token_hash": hashed_token})
+
+    # Return the associated username if token data is found
+    if token_data:
+        return token_data["username"]
+
+    return None
 
 # Bcrypt setup for password hashing
 def hash_password(password):
@@ -45,8 +63,7 @@ def add_security_headers(response):
 def like_post():
     try:
         item_id = int(request.form['item_id'])
-        username = request.cookies.get('username')
-
+        username = get_username_from_token()
         if not username:
             flash('You must be logged in to like a post.', 'error')
             return redirect(url_for('home'))
@@ -74,7 +91,7 @@ def like_post():
 def unlike_post():
     try:
         item_id = int(request.form['item_id'])
-        username = request.cookies.get('username')
+        username = get_username_from_token()
 
         if not username:
             flash('You must be logged in to unlike a post.', 'error')
@@ -106,25 +123,29 @@ def register():
         password1 = request.form['password1']
         password2 = request.form['password2']
 
+        # Check if the username already exists
         if users_collection.find_one({"username": username}):
             flash('Username already exists.', 'error')
-            return redirect(url_for('register'))
+            return redirect(url_for('home'))
 
+        # Check if passwords match
         if password1 != password2:
             flash('Passwords do not match.', 'error')
-            return redirect(url_for('register'))
+            return redirect(url_for('home'))
 
+        # Check if password length is at least 12 characters
         if len(password1) < 12:
             flash('Password must be at least 12 characters long.', 'error')
-            return redirect(url_for('register'))
+            return redirect(url_for('home'))
 
-        hashed_password = hash_password(password1)
+        # Hash the password and save the user
+        hashed_password = generate_password_hash(password1)
         users_collection.insert_one({"username": username, "password": hashed_password})
 
         flash('Registration successful! Please log in.', 'success')
-        return redirect(url_for('home'))
+        return redirect(url_for('login'))
 
-    return render_template('register.html')  # Render the registration form
+    return render_template('index.html')  # Render the registration form
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -133,22 +154,29 @@ def login():
         username = request.form['username']
         password = request.form['password']
 
+        # Fetch user from the database
         user = users_collection.find_one({"username": username})
 
-        if user and check_password(user['password'], password):
+        # Verify password and generate token if correct
+        if user and check_password_hash(user['password'], password):
             token, token_hash = generate_auth_token()
-            tokens_collection.insert_one({"username": username, "token_hash": token_hash, "expires_at": datetime.utcnow() + timedelta(hours=1)})
+            token_hash = token_hash
+            tokens_collection.insert_one({
+                "username": username,
+                "token_hash": token_hash,
+                "expires_at": datetime.utcnow() + timedelta(hours=1)
+            })
 
+            # Set the auth_token cookie
             resp = make_response(redirect(url_for('home')))
             resp.set_cookie('auth_token', token, httponly=True, max_age=60*60)
-            resp.set_cookie('username', username)
 
             return resp
         else:
             flash('Invalid username or password.', 'error')
             return redirect(url_for('home'))
 
-    return render_template('login.html')  # Render the login form
+    return render_template('index.html')  # Render the login form
 
 
 # Route for the home page
@@ -158,23 +186,38 @@ def home():
     print("  ")
     print(tokens_collection)
     items = items_collection.find()
-    username = request.cookies.get('username', None)
-    return render_template('index.html', username=username, items=items)
+    username = get_username_from_token()
+    auth_username = get_username_from_token()
+    print(auth_username)
+
+    return render_template('index.html', username=username, items=items, auth_username=auth_username)
 
 # Logout route
 @app.route('/logout', methods=['POST'])
 def logout():
+    # Get the auth token from cookies
+    auth_token = request.cookies.get('auth_token')
+
+    if auth_token:
+        # Hash the auth token to match the stored token_hash
+        hashed_token = hashlib.sha256(auth_token.encode()).hexdigest()
+
+        # Remove the token from the database
+        tokens_collection.delete_one({"token_hash": hashed_token})
+
+    # Clear the auth token cookie
     resp = make_response(redirect(url_for('home')))
-    resp.set_cookie('auth_token', '', expires=0)  # Clear the auth token cookie
-    resp.set_cookie('username', '', expires=0)  # Clear the username cookie
+    resp.set_cookie('auth_token', '', expires=0)
+
     flash('You have been logged out.', 'success')
     return resp
+
 
 
 # Middleware to check authentication
 def authenticated():
     token = request.cookies.get('auth_token')
-    username = request.cookies.get('username')
+    username = get_username_from_token()
 
     if not token or not username:
         return False
