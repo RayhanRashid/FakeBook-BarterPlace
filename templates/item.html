@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ item['item_name'] }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='itemStyle.css') }}">
+</head>
+<body>
+    <header>
+        <h1>Fakebook Barterplace</h1>
+    </header>
+
+    <main>
+        <div id="highest-bid-section">
+            <h2>Highest Bid: $<span id="highest-bid">0</span></h2>
+        </div>
+
+        <div id="item-details">
+            <h2>{{ item['item_name'] }}</h2>
+            <img src="{{ item['item_image'] }}" alt="{{ item['item_name'] }}">
+            <p>{{ item['item_description'] }}</p>
+        </div>
+
+        <div id="bid-section">
+            {% if auth_username %}
+                <h3>Enter Your Bid</h3>
+                <form id="bid-form" action="/bid" method="POST">
+                    <input type="hidden" name="item_id" value="{{ item_id }}">
+                    <input type="number" id="bid-input" name="bid_value" placeholder="Enter your bid" min="1" required>
+                    <button type="submit" id="place-bid-button">Place Bid</button>
+                </form>
+            {% else %}
+                <p>You need to <a href="/login">log in</a> to place a bid.</p>
+            {% endif %}
+        </div>
+    </main>
+
+</body>
+</html>
