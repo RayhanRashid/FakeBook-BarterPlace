@@ -29,3 +29,8 @@ document.getElementById("register_link").addEventListener("click", function() {
     // Open the register modal
     document.getElementById("register_dialog").showModal();
 });
+
+function viewItem() {
+    window.location.href = "/item";
+}
+

@@ -17,6 +17,7 @@ db = client['flask_auth']  # Database
 users_collection = db['users']  # Collection for storing user data
 tokens_collection = db['tokens']  # Collection for storing authentication tokens
 items_collection = db['itmes'] # Collection for storing item posts and likes
+bids_colletion = db['bids'] # Collection for storing items and their list of bids
 #client.drop_database('flask_auth')
 
 def get_username_from_token():
@@ -58,6 +59,10 @@ def check_token(token, token_hash):
 def add_security_headers(response):
     response.headers['X-Content-Type-Options'] = 'nosniff'
     return response
+
+@app.route('/item', methods=['GET'])
+def item():
+    return render_template('itempage/item.html')
 
 @app.route('/like', methods=['POST'])
 def like_post():
@@ -144,7 +149,7 @@ def register():
 
         flash('Registration successful! Please log in.', 'success')
         return redirect(url_for('login'))
-
+    
     return render_template('index.html')  # Render the registration form
 
 
@@ -234,7 +239,7 @@ def check_authentication():
     if request.path.startswith('/static'):
         return  # Allow static files to load without authentication
 
-    if request.path not in ['/', '/login', '/register','/logout','/post-item', '/post-and-store-item', '/like', '/unlike']:
+    if request.path not in ['/', '/login', '/register','/logout','/post-item', '/post-and-store-item', '/like', '/unlike', '/item']:
         if not authenticated():
             flash('You must be logged in to view this page.')
             return redirect(url_for('home'))
@@ -262,7 +267,7 @@ def post_and_store_item():
         flash('No selected file')
         return redirect(url_for('home'))
     
-    if img_file and allowed_image_files(img_file.filename): 
+    if img_file and allowed_image_files(img_file.filename):
         filename = secure_filename(img_file.filename)
         item_picture_path = os.path.join('static/images', filename)
         img_file.save(item_picture_path)
