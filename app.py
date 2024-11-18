@@ -60,9 +60,13 @@ def add_security_headers(response):
     response.headers['X-Content-Type-Options'] = 'nosniff'
     return response
 
+
 @app.route('/item', methods=['GET'])
 def item():
-    return render_template('itempage/item.html')
+    item = "item"
+    username = get_username_from_token()
+    return render_template('itempage/item.html', username = username, item = item)
+
 
 @app.route('/like', methods=['POST'])
 def like_post():
@@ -192,10 +196,9 @@ def home():
     print(tokens_collection)
     items = items_collection.find()
     username = get_username_from_token()
-    auth_username = get_username_from_token()
-    print(auth_username)
+    print(username)
 
-    return render_template('index.html', username=username, items=items, auth_username=auth_username)
+    return render_template('index.html', username=username, items=items)
 
 # Logout route
 @app.route('/logout', methods=['POST'])

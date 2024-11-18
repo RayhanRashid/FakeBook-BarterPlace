@@ -23,7 +23,7 @@
         </div>
 
         <div id="bid-section">
-            {% if auth_username %}
+            {% if username %}
                 <h3>Enter Your Bid</h3>
                 <form id="bid-form" action="/bid" method="POST">
                     <input type="hidden" name="item_id" value="{{ item_id }}">
