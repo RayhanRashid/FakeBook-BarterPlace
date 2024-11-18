@@ -30,8 +30,8 @@
         {% endif %}
     {% endwith %}
 
-    {% if auth_username %}
-        <h3>Welcome, {{ auth_username }}!</h3>
+    {% if username %}
+        <h3>Welcome, {{ username }}!</h3>
         <form method="POST" action="/logout">
             <input type="submit" value="Logout" class="login-box">
         </form>
@@ -39,7 +39,7 @@
         <button class="login-box" href="javascript:void(0)" id="login_button">Login</button>
     {% endif %}
 
-    {% if auth_username %}
+    {% if username %}
         <form method="POST" action="/post-item">
             <input type="image" src="/static/images/post-button.png" alt="Post Button" class="post-item">
         </form>
@@ -60,7 +60,7 @@
                     
 
                     <!--Like/Unlike Button-->
-                    {% if auth_username and auth_username in item['likes'] %}
+                    {% if username and username in item['likes'] %}
                         <form action="/unlike" method="POST" class="like-form">
                             <input type="hidden" name="item_id" value="{{ item['item_id'] }}">
                             <input type="submit" value="💔" class="like-button">
