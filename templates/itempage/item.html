@@ -13,8 +13,17 @@
 
     <main>
         <div id="highest-bid-section">
-            <h2>Highest Bid: $<span id="highest-bid">0</span></h2>
+            <h2>Highest Bid: $<span id="highest-bid"> {{ highest_bid }} </span></h2>
         </div>
+
+        <!-- Pop-up for new highest bid -->
+        <div id="pop-up" style="display: none;">
+            <div id="pop-up-content">
+                <h2>NEW HIGHEST BID</h2>
+                <img src="{{ url_for('static', filename='images/cats-vibe.gif') }}" alt="cats-vibe" type="image/gif">
+            </div>
+        </div>
+        <!-- End of pop-up -->
 
         <div id="item-details">
             <h2>{{ item['item_name'] }}</h2>
@@ -22,6 +31,7 @@
             <p>{{ item['item_description'] }}</p>
         </div>
 
+        <!-- Bidding section -->
         <div id="bid-section">
             <div id="notification-container"></div>
             {% if username %}
@@ -33,6 +43,17 @@
                 <p>You need to <a href="/login">log in</a> to place a bid.</p>
             {% endif %}
         </div>
+        <!-- End of bidding section -->
+
+        <!-- Bid Notification -->
+         <div id="bid-notification" style="display: none;">
+            <div id="notification-content">
+                <h2><span id="bidder-name" ></span> placed a bid of $<span id="bid-amount">0</span></h2>
+            </div>
+        </div>
+        <!-- End of bid notification -->
+
+        
 
 
     </main>

@@ -106,13 +106,20 @@ def add_security_headers(response):
 
 # Route for viewing an item
 @app.route('/item/<item_id>')
-def view_item(item_id):
+def item(item_id):
     item = items_collection.find_one({"item_id": int(item_id)})
+    
+    bid_item = bids_colletion.find_one({"item_id": int(item_id)})
+    if bid_item:
+        highest_bid = bid_item['highest_bid']
+    else:
+        highest_bid = 0
+
     if not item:
         return "Item not found", 404
     username = get_username_from_token()
-    response = make_response(render_template('/itempage/item.html', item=item, username=username, item_id=item_id))
-    response.set_cookie('item_id', item_id)
+    response = make_response(render_template('/itempage/item.html', item=item, username=username, highest_bid=highest_bid))
+
     return response
 
 
