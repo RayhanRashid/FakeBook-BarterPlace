@@ -56,9 +56,9 @@
                     <img src="{{ item['item_image'] }}" alt="{{ item['item_name'] }}" id="item-button">
                     <p>{{ item['item_name'] }}</p>
                     <p>${{ item['item_price'] }}</p>
-                    <button id="view-item" onclick="viewItem()">View Item</button>
-                    
 
+                    <button id="view-item" onclick="viewItem('{{ item['item_id'] }}')">View Item</button>
+                    
                     <!--Like/Unlike Button-->
                     {% if username and username in item['likes'] %}
                         <form action="/unlike" method="POST" class="like-form">
@@ -74,6 +74,7 @@
                     <p>Likes: {{ item["like_count"] }}</p>
                     <!--End Like/Unlike Button-->
 
+                    
                 </div>
             {% endfor %}
         </section>
