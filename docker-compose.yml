@@ -3,7 +3,7 @@ services:
   app:
     build: .
     ports:
-      - "8080:8080"
+      - "8312:5000" #MODIFIED from 8080:8080
     depends_on:
       - mongo
     environment:
@@ -21,9 +21,7 @@ services:
       - app-network
 
   mongo:
-    image: mongo
-    ports:
-      - "27017:27017"
+    image: mongo #removed ports
     networks:
       - app-network
 
