@@ -57,7 +57,8 @@
                     <p>{{ item['item_name'] }}</p>
                     <p>${{ item['item_price'] }}</p>
 
-                    <button id="view-item" onclick="viewItem('{{ item['item_id'] }}')">View Item</button>
+                    {% set item_to_view = item['item_id'] %}
+                    <button id="view-item" onclick="viewItem('{{ item_to_view }}')">View Item</button>
                     
                     <!--Like/Unlike Button-->
                     {% if username and username in item['likes'] %}
@@ -90,7 +91,7 @@
             <label for="password">Password:</label><br>
             <input type="password" id="password" name="password" required><br><br>
             <input type="submit" value="Login" class="submit-modal"><br><br>
-            <label for="text">Don\'t Have an Account? <a href="javascript:void(0)" id="register_link">Register Here!</a></label>
+            <label for="text">Don't Have an Account? <a href="javascript:void(0)" id="register_link">Register Here!</a></label>
             
         </form>
     </dialog>
