@@ -4,6 +4,7 @@ let home_post_button = document.getElementById('unlogged-post')
 let close_button_login = document.getElementById('close_button_login');
 let close_button_register = document.getElementById('close_button_register');
 
+
 //show the modal when the login button is clicked
 loginBtn.onclick = function() {
     dialog.showModal();
@@ -34,4 +35,5 @@ document.getElementById("register_link").addEventListener("click", function() {
 // Make a request for /item/{itemId} when an item is clicked
 function viewItem(itemId) {
     window.location.href = "/item/" + itemId;
+    socket.emit('join_room', itemId);
 }
