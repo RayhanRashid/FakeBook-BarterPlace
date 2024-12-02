@@ -30,7 +30,8 @@ document.getElementById("register_link").addEventListener("click", function() {
     document.getElementById("register_dialog").showModal();
 });
 
-function viewItem() {
-    window.location.href = "/item";
-}
 
+// Make a request for /item/{itemId} when an item is clicked
+function viewItem(itemId) {
+    window.location.href = "/item/" + itemId;
+}

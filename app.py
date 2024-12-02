@@ -2,6 +2,7 @@ import bcrypt
 import os
 import hashlib
 from flask import Flask, request, redirect, url_for, render_template, make_response, flash, jsonify
+from flask_socketio import SocketIO, emit, join_room
 from pymongo import MongoClient
 from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.utils import secure_filename
@@ -10,6 +11,8 @@ import secrets
 
 app = Flask(__name__)
 app.secret_key = 'supersecretkey'
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode="threading", logger=True, engineio_logger=True)
+
 
 # MongoDB client setup (connecting to MongoDB)
 client = MongoClient('mongodb://mongo:27017/')
@@ -19,6 +22,50 @@ tokens_collection = db['tokens']  # Collection for storing authentication tokens
 items_collection = db['itmes'] # Collection for storing item posts and likes
 bids_colletion = db['bids'] # Collection for storing items and their list of bids
 #client.drop_database('flask_auth')
+
+
+@socketio.on('join_room')
+def handle_join(data):
+    room = f'item_{data}'
+    join_room(room)
+    print(f"User joined room: {room}")
+
+@socketio.on('place_bid')
+def handle_bidding(data):
+    try:
+        item_id = int(data['item_id'])
+        bid = int(data['bid_amount'])
+
+        username = get_username_from_token()
+        
+        # Find the currect highest bid for the item
+        item = bids_colletion.find_one({"item_id": item_id})
+        if not item:
+            bids_colletion.insert_one({"item_id": item_id, "bids": [], "highest_bid": 0, "highest_bidder": None})
+            item = bids_colletion.find_one({"item_id": item_id})
+
+        print(f"Current item data: {item}")
+
+        bids_colletion.update_one(
+            {"item_id": item_id},
+            {"$push": {"bids": {"username": username, "bid": bid}}}
+        )
+
+        highest_bid = item['highest_bid']
+
+        if bid > highest_bid:
+            bids_colletion.update_one(
+                {"item_id": item_id},
+                {"$set": {"highest_bid": bid, "highest_bidder": username}}
+            )
+            emit('new_highest_bid', {'item_id': item_id, 'username': username, 'bid': bid}, room=f'item_{item_id}')
+        else:
+            emit('new_bid', {'item_id': item_id, 'username': username, 'bid': bid}, room=f'item_{item_id}')
+    except Exception as e:
+        emit('error', {'message': 'Error while handling bidding: ' + str(e)})
+
+
+
 
 def get_username_from_token():
     auth_token = request.cookies.get('auth_token')
@@ -61,11 +108,23 @@ def add_security_headers(response):
     return response
 
 
-@app.route('/item', methods=['GET'])
-def item():
-    item = "item"
+# Route for viewing an item
+@app.route('/item/<item_id>')
+def item(item_id):
+    item = items_collection.find_one({"item_id": int(item_id)})
+    
+    bid_item = bids_colletion.find_one({"item_id": int(item_id)})
+    if bid_item:
+        highest_bid = bid_item['highest_bid']
+    else:
+        highest_bid = 0
+
+    if not item:
+        return "Item not found", 404
     username = get_username_from_token()
-    return render_template('itempage/item.html', username = username, item = item)
+    response = make_response(render_template('/itempage/item.html', item=item, username=username, highest_bid=highest_bid))
+
+    return response
 
 
 @app.route('/like', methods=['POST'])
@@ -242,7 +301,7 @@ def check_authentication():
     if request.path.startswith('/static'):
         return  # Allow static files to load without authentication
 
-    if request.path not in ['/', '/login', '/register','/logout','/post-item', '/post-and-store-item', '/like', '/unlike', '/item']:
+    if request.path not in ['/', '/login', '/register','/logout','/post-item', '/post-and-store-item', '/like', '/unlike', "/item"] and not request.path.startswith('/item/'):
         if not authenticated():
             flash('You must be logged in to view this page.')
             return redirect(url_for('home'))
@@ -304,4 +363,4 @@ def allowed_image_files(filename):
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8080, debug=True)
+    socketio.run(app, host='0.0.0.0', port=8080, debug=True)

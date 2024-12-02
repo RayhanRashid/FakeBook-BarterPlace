@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ item['item_name'] }}</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='itemStyles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/itemStyles.css') }}">
 </head>
 <body>
     <header>
@@ -13,28 +13,54 @@
 
     <main>
         <div id="highest-bid-section">
-            <h2>Highest Bid: $<span id="highest-bid">0</span></h2>
+            <h2>Highest Bid: $<span id="highest-bid"> {{ highest_bid }} </span></h2>
         </div>
+
+        <!-- Pop-up for new highest bid -->
+        <div id="pop-up" style="display: none;">
+            <div id="pop-up-content">
+                <h2>NEW HIGHEST BID ALERT!</h2>
+                <img src="{{ url_for('static', filename='images/cats-vibe.gif') }}" alt="cats-vibe" type="image/gif">
+            </div>
+        </div>
+        <!-- End of pop-up -->
 
         <div id="item-details">
             <h2>{{ item['item_name'] }}</h2>
-            <img src="{{ item['item_image'] }}" alt="{{ item['item_name'] }}">
+            <img src="{{ url_for('static', filename=item['item_image'].replace('static/', '')) }}" alt="{{ item['item_name'] }}">
             <p>{{ item['item_description'] }}</p>
         </div>
 
+        <!-- Bidding section -->
         <div id="bid-section">
+            <div id="notification-container"></div>
             {% if username %}
                 <h3>Enter Your Bid</h3>
-                <form id="bid-form" action="/bid" method="POST">
-                    <input type="hidden" name="item_id" value="{{ item_id }}">
-                    <input type="number" id="bid-input" name="bid_value" placeholder="Enter your bid" min="1" required>
-                    <button type="submit" id="place-bid-button">Place Bid</button>
-                </form>
+                <input type="hidden" id="item-id" value="{{ item['item_id'] }}">
+                <input type="number" id="bid-input" placeholder="Enter your bid" min="1" required>
+                <button type="button" id="place-bid-button" onclick="placeBid()">Place Bid</button>
             {% else %}
                 <p>You need to <a href="/login">log in</a> to place a bid.</p>
             {% endif %}
         </div>
+        <!-- End of bidding section -->
+
+        <!-- Bid Notification -->
+         <div id="bid-notification" style="display: none;">
+            <div id="notification-content">
+                <h2><span id="bidder-name" ></span> placed a bid of $<span id="bid-amount">0</span></h2>
+            </div>
+        </div>
+        <!-- End of bid notification -->
+
+        
+
+
     </main>
+
+    </html>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA==" crossorigin="anonymous"></script>
+    <script src="/static/js/item.js"></script>
 
 </body>
 </html>
