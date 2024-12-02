@@ -10,6 +10,15 @@ services:
       - FLASK_ENV=development
     networks:
       - app-network
+  nginx:
+    build: ./nginx
+    ports:
+     - '80:80'
+     - '443:443'
+    depends_on:
+      - app
+    networks:
+      - app-network
 
   mongo:
     image: mongo
