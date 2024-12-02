@@ -2,7 +2,7 @@ import bcrypt
 import os
 import hashlib
 from flask import Flask, request, redirect, url_for, render_template, make_response, flash, jsonify
-from flask_socketio import SocketIO, emit
+from flask_socketio import SocketIO, emit, join_room
 from pymongo import MongoClient
 from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.utils import secure_filename
@@ -24,7 +24,11 @@ bids_colletion = db['bids'] # Collection for storing items and their list of bid
 #client.drop_database('flask_auth')
 
 
-
+@socketio.on('join_room')
+def handle_join(data):
+    room = f'item_{data}'
+    join_room(room)
+    print(f"User joined room: {room}")
 
 @socketio.on('place_bid')
 def handle_bidding(data):
@@ -54,9 +58,9 @@ def handle_bidding(data):
                 {"item_id": item_id},
                 {"$set": {"highest_bid": bid, "highest_bidder": username}}
             )
-            emit('new_highest_bid', {'item_id': item_id, 'username': username, 'bid': bid}, broadcast=True)
+            emit('new_highest_bid', {'item_id': item_id, 'username': username, 'bid': bid}, room=f'item_{item_id}')
         else:
-            emit('new_bid', {'item_id': item_id, 'username': username, 'bid': bid}, broadcast=True)
+            emit('new_bid', {'item_id': item_id, 'username': username, 'bid': bid}, room=f'item_{item_id}')
     except Exception as e:
         emit('error', {'message': 'Error while handling bidding: ' + str(e)})
 

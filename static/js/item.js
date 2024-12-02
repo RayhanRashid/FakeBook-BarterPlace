@@ -4,6 +4,10 @@ var socket = io('http://localhost:8080', {
 	transports: ['websocket']
 });
 
+// Create room for this item
+var itemId = document.getElementById('item-id').value;
+socket.emit('join_room', itemId);
+
 socket.on('error', function(data) {
 	console.log('Error: ', data.message);
 });
