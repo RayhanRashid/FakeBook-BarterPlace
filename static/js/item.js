@@ -1,6 +1,6 @@
 // Websocket connection
 
-var socket = io('http://localhost:8080', {
+var socket = io('https://fakebookbarterplace.com', {
 	transports: ['websocket']
 });
 
