@@ -11,7 +11,7 @@ import secrets
 
 app = Flask(__name__)
 app.secret_key = 'supersecretkey'
-socketio = SocketIO(app, cors_allowed_origins="*", async_mode="threading", logger=True, engineio_logger=True)
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode="threading")
 
 
 # MongoDB client setup (connecting to MongoDB)
