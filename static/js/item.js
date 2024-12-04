@@ -1,6 +1,12 @@
+<<<<<<< HEAD
 // In production uses wss, in development uses ws
 var isProduction = window.location.hostname !== 'localhost';
 var socket = io((isProduction ? 'wss://' : 'ws://') + window.location.host, {
+=======
+// Websocket connection
+
+var socket = io('wss://' + window.location.host, {
+>>>>>>> 1683b5aaf66f3df840b4689bae0f50cef9e8b34e
 	transports: ['websocket']
 });
 
