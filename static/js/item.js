@@ -1,7 +1,16 @@
-// Websocket connection
-
-var socket = io('wss://cse312barterplace.com', {
+// In production uses wss, in development uses ws
+var isProduction = window.location.hostname !== 'localhost';
+var socket = io((isProduction ? 'wss://' : 'ws://') + window.location.host, {
 	transports: ['websocket']
+});
+
+socket.on('connect', function() {
+	console.log('WebSocket connection established');
+});
+
+socket.on('connect_error', function(error) {
+	console.error('WebSocket connection failed: ', error);
+	alert('WebSocket connection failed. Please try again later.');
 });
 
 // Create room for this item
