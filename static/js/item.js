@@ -1,6 +1,6 @@
 // Websocket connection
 
-var socket = io('wss://fakebookbarterplace.com', {
+var socket = io(, {
 	transports: ['websocket']
 });
 
