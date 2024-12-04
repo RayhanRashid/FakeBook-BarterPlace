@@ -1,6 +1,6 @@
 // Websocket connection
 
-var socket = io('wss://cse312barterplace.com', {
+var socket = io('wss://' + window.location.host, {
 	transports: ['websocket']
 });
 
