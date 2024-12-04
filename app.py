@@ -60,11 +60,19 @@ def handle_bidding(data):
             )
             emit('new_highest_bid', {'item_id': item_id, 'username': username, 'bid': bid}, room=f'item_{item_id}')
         else:
-            emit('new_bid', {'item_id': item_id, 'username': username, 'bid': bid}, room=f'item_{item_id}')
+            emit('new_bid', {'item_id': item_id, 'username': username, 'bid': bid})
     except Exception as e:
         emit('error', {'message': 'Error while handling bidding: ' + str(e)})
 
 
+@socketio.on('connect')
+def handle_connect():
+    print('Client connected')
+    emit('connect', {'message': 'Connected to server'})
+
+@socketio.on('disconnect')
+def handle_disconnect():
+    print('Client disconnected')
 
 
 def get_username_from_token():
