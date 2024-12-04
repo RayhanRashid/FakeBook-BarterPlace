@@ -36,6 +36,8 @@
         <div id="pop-up" style="display: none;">
             <div id="pop-up-content">
                 <h2>NEW HIGHEST BID ALERT!</h2>
+                <h2><span id="bidder-name" ></span> placed a bid of $<span id="bid-amount">0</span></h2>
+
                 <img src="{{ url_for('static', filename='images/cats-vibe.gif') }}" alt="cats-vibe" type="image/gif">
             </div>
         </div>
@@ -64,16 +66,6 @@
             {% endif %}
         </div>
         <!-- End of bidding section -->
-
-        <!-- Bid Notification -->
-         <div id="bid-notification" style="display: none;">
-            <div id="notification-content">
-                <h2><span id="bidder-name" ></span> placed a bid of $<span id="bid-amount">0</span></h2>
-            </div>
-        </div>
-        <!-- End of bid notification -->
-
-        
 
 
     </main>
