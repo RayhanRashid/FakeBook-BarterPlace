@@ -11,6 +11,10 @@ socket.on('connect', function() {
 socket.on('connect_error', function(error) {
 	console.error('WebSocket connection failed: ', error);
 	alert('WebSocket connection failed. Please try again later.');
+	// Retry connection after 2 seconds
+	setTimeout(function() {
+		socket.connect();
+	}, 5000);
 });
 
 // Create room for this item
@@ -40,8 +44,8 @@ socket.on('new_highest_bid', function(data) {
 });
 
 socket.on('new_bid', function(data) {
-	console.log('New bid place by ' + data.username + ' for ' + data.bid);
-	showBidNotification(data.bid, data.username);
+	console.log('New bid by ' + data.username + ': ' + data.bid);
+	alert("Bid must be higher than current highest bid");
 });
 
 function placeBid() {
