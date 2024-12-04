@@ -28,11 +28,15 @@ socket.on('error', function(data) {
 socket.on('new_highest_bid', function(data) {
 	console.log('New highest bid by ' + data.username + ': ' + data.bid);
 
-	showBidNotification(data.bid, data.username);
-
 	// Update highest bid on page
 	var highestBidElement = document.getElementById('highest-bid');
 	highestBidElement.textContent = data.bid;
+
+	var bidderNameSpan = document.getElementById('bidder-name');
+	var bidAmountSpan = document.getElementById('bid-amount');
+
+	bidderNameSpan.textContent = data.username;
+	bidAmountSpan.textContent = data.bid;
 
 	// Show pop up gif for 2 seconds
 	var popup = document.getElementById('pop-up');
@@ -56,17 +60,4 @@ function placeBid() {
 	}
 	var itemId = document.getElementById('item-id').value;
 	socket.emit('place_bid', {item_id: itemId, bid_amount: bidAmount});
-} 
-
-function showBidNotification(bidAmount, bidderName) {
-	// Show new bid notification for 3 seconds
-	var notification = document.getElementById('bid-notification');
-	var bidAmountSpan = document.getElementById('bid-amount');
-	var bidderNameSpan = document.getElementById('bidder-name');
-	bidAmountSpan.textContent = bidAmount;
-	bidderNameSpan.textContent = bidderName;
-	notification.style.display = 'block';
-	setTimeout(function() {
-		notification.style.display = 'none';
-	}, 3000);
 }
