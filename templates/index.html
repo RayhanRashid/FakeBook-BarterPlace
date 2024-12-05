@@ -13,7 +13,7 @@
         <h2 style="display: inline;">Barterplace</h2>
         <div class="search-bar">
             <form action="/search" method="GET">
-                <input type="text" name="query" placeholder="Search...">
+                <input type="text" name="query" placeholder="Search..." value="{{ query }}">
                 <input type="submit" value="Search">
             </form>
         </div>
@@ -51,6 +51,9 @@
 
     <main>
         <section class="image-grid">
+            {% if query %}
+                <h2>Search results for "{{ query }}":</h2>
+            {% endif %}
             {% for item in items %}
                 <div class="image-item">
                     <img src="{{ item['item_image'] }}" alt="{{ item['item_name'] }}" id="item-button">
@@ -78,6 +81,13 @@
                     
                 </div>
             {% endfor %}
+            {% if query and not items %}
+                <p>No results found.</p>
+                <p><a href="/">Return to home page</a></p>
+
+            {% elif query %}
+                <p><a href="/">Return to home page</a></p>
+            {% endif %}
         </section>
     </main>
 

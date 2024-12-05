@@ -24,6 +24,18 @@ bids_colletion = db['bids'] # Collection for storing items and their list of bid
 #client.drop_database('flask_auth')
 
 
+
+@app.route('/search', methods=['GET'])
+def search():
+    query = request.args.get('query')
+    if not query:
+        print("No query")
+        return render_template('index.html')
+    
+    search_results = items_collection.find({"item_name": {"$regex": query, "$options": "i"}})
+
+    return render_template('index.html', items=search_results, query=query)
+
 @socketio.on('join_room')
 def handle_join(data):
     room = f'item_{data}'
@@ -309,7 +321,7 @@ def check_authentication():
     if request.path.startswith('/static'):
         return  # Allow static files to load without authentication
 
-    if request.path not in ['/', '/login', '/register','/logout','/post-item', '/post-and-store-item', '/like', '/unlike', "/item"] and not request.path.startswith('/item/'):
+    if request.path not in ['/', '/login', '/register','/logout','/post-item', '/post-and-store-item', '/like', '/unlike', "/item", "/search"] and not request.path.startswith('/item/'):
         if not authenticated():
             flash('You must be logged in to view this page.')
             return redirect(url_for('home'))
