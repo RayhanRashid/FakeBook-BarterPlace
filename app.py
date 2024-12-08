@@ -12,6 +12,10 @@ from flask_socketio import SocketIO, emit, join_room
 from pymongo import MongoClient
 from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.utils import secure_filename
+from datetime import datetime, timedelta
+from collections import defaultdict
+from time import time
+
 import secrets
 from flask import Flask, render_template, request, redirect, url_for
 from flask_socketio import SocketIO, emit
@@ -30,6 +34,53 @@ tokens_collection = db['tokens']  # Collection for storing authentication tokens
 items_collection = db['itmes'] # Collection for storing item posts and likes
 bids_colletion = db['bids'] # Collection for storing items and their list of bids
 #client.drop_database('flask_auth')
+
+RATE_LIMIT = 50
+WINDOW_SIZE = 10
+BLOCK_DURATION = 30
+request_log = defaultdict(list)
+blocked_ips = {} 
+
+def is_rate_limited(ip):
+    current_time = time()
+
+    #1. Remove old timestamps outside of time window
+    request_log[ip] = [timestamp for timestamp in request_log[ip] if timestamp > current_time - WINDOW_SIZE]
+
+    #2. Check if IP is still blocked
+    if ip in blocked_ips:
+        if current_time < blocked_ips[ip]:
+            # - Still blocked return to rate limiting function
+            return True
+        else:
+            # - Not blocked rm ip from dictionary
+            del blocked_ips[ip]
+
+    #3. Update request log with current request time
+    request_log[ip].append(current_time)
+    
+    #4. Check if # of requests from IP exceeds rate limit 
+    if len(request_log[ip]) > RATE_LIMIT:
+        # -  ip to blocked list with the time the block duration ends
+        blocked_ips[ip] = current_time + BLOCK_DURATION
+        return True
+
+    return False
+
+#CHECKS EACH REQUEST
+@app.before_request
+def rate_limit():
+    ip = request.remote_addr
+
+    if is_rate_limited(ip):
+        response = make_response(
+            jsonify({
+                "error": "Too Many Requests",
+                "message": f"You have been rate-limited. Please wait {BLOCK_DURATION} seconds."
+            }),
+            429
+        )
+        return response
 
 
 
@@ -70,12 +121,13 @@ def handle_bidding(data):
 
         bids_colletion.update_one(
             {"item_id": item_id},
-            {"$push": {"bids": {"username": username, "bid": bid}}}
+            {"$push": {"bids": {"username": username, "bid": bid, "highest_bidder": username}}},
         )
 
         highest_bid = item['highest_bid']
 
         if bid > highest_bid:
+            print(username)
             bids_colletion.update_one(
                 {"item_id": item_id},
                 {"$set": {"highest_bid": bid, "highest_bidder": highest_bidder}}
@@ -152,7 +204,7 @@ def item(item_id):
         highest_bidder = bid_item['highest_bidder']
     else:
         highest_bid = 0
-        highest_bidder = "Nobody"
+        highest_bidder = "None"
 
     if not item:
         return "Item not found", 404
@@ -384,8 +436,8 @@ def post_and_store_item():
     item_price = request.form['item-price']
     item_description = request.form['item-description']
      # // Bidding starts at this time
-
-    items_collection.insert_one({"item_id": item_id, "item_name": item_name, "item_price": item_price, "item_description": item_description, "item_image": item_picture_path, "bid_start_time": datetime.now(), "likes": [], "like_count": 0})
+    username = get_username_from_token()
+    items_collection.insert_one({"item_id": item_id, "item_name": item_name, "item_price": item_price, "item_description": item_description, "item_image": item_picture_path, "bid_start_time": datetime.now(), "likes": [], "like_count": 0, "highest_bidder": ""})
 
     return redirect(url_for('home'))
 

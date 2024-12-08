@@ -95,6 +95,8 @@ function updateCountdown() {
 		remainingTimeElement.textContent = remainingTime.toString(); // Update the text content
 		console.log(parseInt(document.getElementById('remaining-time').textContent))
 	}
+	else{
+
+	}
 }
 const countdownInterval = setInterval(updateCountdown, 1000);
-let we
