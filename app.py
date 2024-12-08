@@ -1,3 +1,7 @@
+import time
+from datetime import datetime
+from flask_socketio import SocketIO, emit
+import threading
 import bcrypt
 import os
 import hashlib
@@ -139,7 +143,7 @@ def item(item_id):
     
     bid_item = bids_colletion.find_one({"item_id": int(item_id)})
     bid_start_time = item['bid_start_time']
-    remaining_time = max(0, 300 - int((datetime.now() - bid_start_time).total_seconds()))
+    remaining_time = max(-60, 300 - int((datetime.now() - bid_start_time).total_seconds()))
 
     if bid_item:
         highest_bid = bid_item['highest_bid']
@@ -153,13 +157,28 @@ def item(item_id):
 
     return response
 
-@socketio.on('start_timer')
-def handle_timer(item_id):
+def update_timer(item_id):
     item = items_collection.find_one({"item_id": int(item_id)})
     if item:
         bid_start_time = item['bid_start_time']
-        time_remaining = max(0, 300 - int((datetime.now() - bid_start_time).total_seconds()))
-        emit('timer_update', {'time_remaining': time_remaining}, broadcast=True)
+        while True:
+            # Calculate remaining time (5 minutes = 300 seconds)
+            time_remaining = max(0, 30 - int((datetime.now() - bid_start_time).total_seconds()))
+
+            # Emit the updated time remaining to the frontend
+            socketio.emit('timer_update', {'time_remaining': time_remaining}, room=item_id)
+
+            # Stop if the time is up
+            if time_remaining == 0:
+                break
+
+            time.sleep(1)  # Wait 1 second before updating again
+
+# When the page is loaded, start the timer
+@socketio.on('start_timer')
+def handle_timer(item_id):
+    # Start the timer in a separate thread so it doesn't block the server
+    threading.Thread(target=update_timer, args=(item_id,)).start()
 
 @app.route('/like', methods=['POST'])
 def like_post():

@@ -55,15 +55,43 @@ socket.on('new_bid', function(data) {
 
 function placeBid() {
 	var bidAmount = document.getElementById('bid-input').value;
-	if (bidAmount == '') {
-		alert('Please enter a valid bid amount');
-		return;
+	let remainingTime = parseInt(document.getElementById('remaining-time').textContent);
+	if (remainingTime <= 0){
+		alert("Bidding Time is over")
 	}
-	var itemId = document.getElementById('item-id').value;
-	socket.emit('place_bid', {item_id: itemId, bid_amount: bidAmount});
+	else{
+		if (bidAmount == '') {
+			alert('Please enter a valid bid amount');
+			return;
+		}
+		var itemId = document.getElementById('item-id').value;
+		socket.emit('place_bid', {item_id: itemId, bid_amount: bidAmount});
+	}
+
 }
 socket.on('timer_update', function(data) {
 	var timeRemaining = data.time_remaining;
 	// Update the timer display with the remaining time
 	document.getElementById('timer-display').innerText = `Time Remaining: ${timeRemaining} seconds`;
 });
+let remainingTime = parseInt(document.getElementById('remaining-time').textContent);
+
+// Debugging: Ensure the initial remaining time is correct
+console.log("Initial remaining time:", remainingTime);
+
+function updateCountdown() {
+	let remainingTimeElement = document.getElementById('remaining-time');
+
+	// Check if remainingTime is a valid number
+	if (isNaN(remainingTime)) {
+		console.error("Error: remainingTime is NaN");
+		return;
+	}
+
+	if (remainingTime > 0) {
+		remainingTime -= 1; // Decrement the remaining time
+		remainingTimeElement.textContent = remainingTime.toString(); // Update the text content
+		console.log(parseInt(document.getElementById('remaining-time').textContent))
+	}
+}
+const countdownInterval = setInterval(updateCountdown, 1000);
