@@ -107,12 +107,14 @@ def handle_bidding(data):
         item_id = int(data['item_id'])
         bid = int(data['bid_amount'])
 
-        username = str(data['bidder'])
+        username = get_username_from_token()
+
+        highest_bidder = str(data['highest_bidder'])
         
         # Find the currect highest bid for the item
         item = bids_colletion.find_one({"item_id": item_id})
         if not item:
-            bids_colletion.insert_one({"item_id": item_id, "bids": [], "highest_bid": 0, "highest_bidder": username})
+            bids_colletion.insert_one({"item_id": item_id, "bids": [], "highest_bid": 0, "highest_bidder": highest_bidder})
             item = bids_colletion.find_one({"item_id": item_id})
 
         print(f"Current item data: {item}")
@@ -128,10 +130,9 @@ def handle_bidding(data):
             print(username)
             bids_colletion.update_one(
                 {"item_id": item_id},
-                {"$set": {"highest_bid": bid, "highest_bidder": username}}
+                {"$set": {"highest_bid": bid, "highest_bidder": highest_bidder}}
             )
-            print(bids_colletion.find_one({"item_id": item_id}))
-            emit('new_highest_bid', {'item_id': item_id, 'username': username, 'bid': bid}, room=f'item_{item_id}')
+            emit('new_highest_bid', {'item_id': item_id, 'username': highest_bidder, 'bid': bid}, room=f'item_{item_id}')
         else:
             emit('new_bid', {'item_id': item_id, 'username': username, 'bid': bid})
     except Exception as e:
@@ -197,17 +198,19 @@ def item(item_id):
     bid_item = bids_colletion.find_one({"item_id": int(item_id)})
     bid_start_time = item['bid_start_time']
     remaining_time = max(0, 300 - int((datetime.now() - bid_start_time).total_seconds()))
-    highest_bidder= item['highest_bidder']
+
     if bid_item:
         highest_bid = bid_item['highest_bid']
+        highest_bidder = bid_item['highest_bidder']
     else:
         highest_bid = 0
+        highest_bidder = "None"
 
     if not item:
         return "Item not found", 404
     username = get_username_from_token()
-    response = make_response(render_template('/itempage/item.html', item=item, username=username, highest_bid=highest_bid, remaining_time=remaining_time, highest_bidder=highest_bidder))
-    print(response)
+    response = make_response(render_template('/itempage/item.html', item=item, username=username, highest_bid=highest_bid, highest_bidder=highest_bidder, remaining_time=remaining_time))
+
     return response
 
 def update_timer(item_id):

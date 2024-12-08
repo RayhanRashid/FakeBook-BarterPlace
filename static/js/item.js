@@ -32,8 +32,9 @@ socket.on('new_highest_bid', function(data) {
 	// Update highest bid on page
 	var highestBidElement = document.getElementById('highest-bid');
 	highestBidElement.textContent = data.bid;
-	let HighestBidderElement = document.getElementById('highest-bidder');
-	HighestBidderElement.textContent = data.username
+	var highestBidderElement = document.getElementById('highest-bidder');
+	highestBidderElement.textContent = data.username;
+
 	var bidderNameSpan = document.getElementById('bidder-name');
 	var bidAmountSpan = document.getElementById('bid-amount');
 
@@ -66,7 +67,7 @@ function placeBid(username) {
 			return;
 		}
 		var itemId = document.getElementById('item-id').value;
-		socket.emit('place_bid', {item_id: itemId, bid_amount: bidAmount, bidder: username });
+		socket.emit('place_bid', {item_id: itemId, bid_amount: bidAmount, highest_bidder: username});
 	}
 
 }
