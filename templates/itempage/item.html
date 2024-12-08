@@ -73,27 +73,7 @@
     </main>
 
     <script>
-        {#let remainingTime = parseInt(document.getElementById('remaining-time').textContent);#}
-        {##}
-        {#// Debugging: Ensure the initial remaining time is correct#}
-        {#console.log("Initial remaining time:", remainingTime);#}
-        {##}
-        {#function updateCountdown() {#}
-        {#    let remainingTimeElement = document.getElementById('remaining-time');#}
-        {##}
-        {#    // Check if remainingTime is a valid number#}
-        {#    if (isNaN(remainingTime)) {#}
-        {#        console.error("Error: remainingTime is NaN");#}
-        {#        return;#}
-        {#    }#}
-        {##}
-        {#    if (remainingTime > 0) {#}
-        {#        remainingTime -= 1; // Decrement the remaining time#}
-        {#        remainingTimeElement.textContent = remainingTime.toString(); // Update the text content#}
-        {#        console.log(parseInt(document.getElementById('remaining-time').textContent))#}
-        {#    }#}
 
-        {#const countdownInterval = setInterval(updateCountdown, 1000);#}
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA==" crossorigin="anonymous"></script>
     <script src="/static/js/item.js"></script>
