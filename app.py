@@ -1,6 +1,12 @@
+import time
+from datetime import datetime
+from flask_socketio import SocketIO, emit
+import threading
 import bcrypt
 import os
 import hashlib
+
+import pymongo
 from flask import Flask, request, redirect, url_for, render_template, make_response, flash, jsonify
 from flask_socketio import SocketIO, emit, join_room
 from pymongo import MongoClient
@@ -9,7 +15,11 @@ from werkzeug.utils import secure_filename
 from datetime import datetime, timedelta
 from collections import defaultdict
 from time import time
+
 import secrets
+from flask import Flask, render_template, request, redirect, url_for
+from flask_socketio import SocketIO, emit
+from datetime import datetime, timedelta
 
 app = Flask(__name__)
 app.secret_key = 'supersecretkey'
@@ -97,28 +107,30 @@ def handle_bidding(data):
         item_id = int(data['item_id'])
         bid = int(data['bid_amount'])
 
-        username = get_username_from_token()
+        username = str(data['bidder'])
         
         # Find the currect highest bid for the item
         item = bids_colletion.find_one({"item_id": item_id})
         if not item:
-            bids_colletion.insert_one({"item_id": item_id, "bids": [], "highest_bid": 0, "highest_bidder": None})
+            bids_colletion.insert_one({"item_id": item_id, "bids": [], "highest_bid": 0, "highest_bidder": username})
             item = bids_colletion.find_one({"item_id": item_id})
 
         print(f"Current item data: {item}")
 
         bids_colletion.update_one(
             {"item_id": item_id},
-            {"$push": {"bids": {"username": username, "bid": bid}}}
+            {"$push": {"bids": {"username": username, "bid": bid, "highest_bidder": username}}},
         )
 
         highest_bid = item['highest_bid']
 
         if bid > highest_bid:
+            print(username)
             bids_colletion.update_one(
                 {"item_id": item_id},
                 {"$set": {"highest_bid": bid, "highest_bidder": username}}
             )
+            print(bids_colletion.find_one({"item_id": item_id}))
             emit('new_highest_bid', {'item_id': item_id, 'username': username, 'bid': bid}, room=f'item_{item_id}')
         else:
             emit('new_bid', {'item_id': item_id, 'username': username, 'bid': bid})
@@ -183,6 +195,9 @@ def item(item_id):
     item = items_collection.find_one({"item_id": int(item_id)})
     
     bid_item = bids_colletion.find_one({"item_id": int(item_id)})
+    bid_start_time = item['bid_start_time']
+    remaining_time = max(0, 300 - int((datetime.now() - bid_start_time).total_seconds()))
+    highest_bidder= item['highest_bidder']
     if bid_item:
         highest_bid = bid_item['highest_bid']
     else:
@@ -191,10 +206,32 @@ def item(item_id):
     if not item:
         return "Item not found", 404
     username = get_username_from_token()
-    response = make_response(render_template('/itempage/item.html', item=item, username=username, highest_bid=highest_bid))
-
+    response = make_response(render_template('/itempage/item.html', item=item, username=username, highest_bid=highest_bid, remaining_time=remaining_time, highest_bidder=highest_bidder))
+    print(response)
     return response
 
+def update_timer(item_id):
+    item = items_collection.find_one({"item_id": int(item_id)})
+    if item:
+        bid_start_time = item['bid_start_time']
+        while True:
+            # Calculate remaining time (5 minutes = 300 seconds)
+            time_remaining = max(0, 30 - int((datetime.now() - bid_start_time).total_seconds()))
+
+            # Emit the updated time remaining to the frontend
+            socketio.emit('timer_update', {'time_remaining': time_remaining}, room=item_id)
+
+            # Stop if the time is up
+            if time_remaining == 0:
+                break
+
+            time.sleep(1)  # Wait 1 second before updating again
+
+# When the page is loaded, start the timer
+@socketio.on('start_timer')
+def handle_timer(item_id):
+    # Start the timer in a separate thread so it doesn't block the server
+    threading.Thread(target=update_timer, args=(item_id,)).start()
 
 @app.route('/like', methods=['POST'])
 def like_post():
@@ -223,7 +260,6 @@ def like_post():
     except Exception as e:
         flash('An error occurred while liking the post.', 'error')
         return redirect(url_for('home'))
-    
 @app.route('/unlike', methods=['POST'])
 def unlike_post():
     try:
@@ -251,7 +287,6 @@ def unlike_post():
     except Exception as e:
         flash('An error occurred while unliking the post.', 'error')
         return redirect(url_for('home'))
-
 # Route for the home page
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -283,8 +318,6 @@ def register():
         return redirect(url_for('login'))
     
     return render_template('index.html')  # Render the registration form
-
-
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -314,8 +347,6 @@ def login():
             return redirect(url_for('home'))
 
     return render_template('index.html')  # Render the login form
-
-
 # Route for the home page
 @app.route('/')
 def home():
@@ -327,7 +358,6 @@ def home():
     print(username)
 
     return render_template('index.html', username=username, items=items)
-
 # Logout route
 @app.route('/logout', methods=['POST'])
 def logout():
@@ -347,9 +377,6 @@ def logout():
 
     flash('You have been logged out.', 'success')
     return resp
-
-
-
 # Middleware to check authentication
 def authenticated():
     token = request.cookies.get('auth_token')
@@ -363,7 +390,6 @@ def authenticated():
         return check_token(token, stored_token['token_hash']) and datetime.utcnow() < stored_token['expires_at']
 
     return False
-
 # Ensure that user is authenticated
 @app.before_request
 def check_authentication():
@@ -406,8 +432,9 @@ def post_and_store_item():
     item_name = request.form['item-name']
     item_price = request.form['item-price']
     item_description = request.form['item-description']
-
-    items_collection.insert_one({"item_id": item_id, "item_name": item_name, "item_price": item_price, "item_description": item_description, "item_image": item_picture_path, "likes": [], "like_count": 0})
+     # // Bidding starts at this time
+    username = get_username_from_token()
+    items_collection.insert_one({"item_id": item_id, "item_name": item_name, "item_price": item_price, "item_description": item_description, "item_image": item_picture_path, "bid_start_time": datetime.now(), "likes": [], "like_count": 0, "highest_bidder": ""})
 
     return redirect(url_for('home'))
 
