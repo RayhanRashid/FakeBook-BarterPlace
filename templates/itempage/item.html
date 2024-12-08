@@ -42,7 +42,8 @@
             </div>
         </div>
         <!-- End of pop-up -->
-
+        
+        
         <!--DISPLAY ITEM-->
         <div class="image-item">
             <img src="{{ url_for('static', filename=item['item_image'].replace('static/', '')) }}" alt="{{ item['item_name'] }}" id="item-button">
@@ -51,21 +52,22 @@
         </div>
         <!--DISPLAY ITEM-->
 
-
-        <!-- Bidding section -->
-        <div id="bid-section">
-            <div id="notification-container"></div>
-            {% if username %}
-                <h3>Enter Your Bid</h3>
-                <input type="hidden" id="item-id" value="{{ item['item_id'] }}">
-                <input type="number" id="bid-input" placeholder="Enter your bid" min="1" required>
-                <button type="button" id="place-bid-button" onclick="placeBid()">Place Bid</button>
-            {% else %}
-                <input type="hidden" id="item-id" value="{{ item['item_id'] }}">
-                <p>You need to <a href="/">log in</a> to place a bid.</p>
-            {% endif %}
-        </div>
-        <!-- End of bidding section -->
+        {% if remaining_time > 0 %}
+            <!-- Bidding section -->
+            <div id="bid-section">
+                <div id="notification-container"></div>
+                {% if username %}
+                    <h3>Enter Your Bid</h3>
+                    <input type="hidden" id="item-id" value="{{ item['item_id'] }}">
+                    <input type="number" id="bid-input" placeholder="Enter your bid" min="1" required>
+                    <button type="button" id="place-bid-button" onclick="placeBid()">Place Bid</button>
+                {% else %}
+                    <input type="hidden" id="item-id" value="{{ item['item_id'] }}">
+                    <p>You need to <a href="/">log in</a> to place a bid.</p>
+                {% endif %}
+            </div>
+            <!-- End of bidding section -->
+        {% endif %}
 
 
     </main>
