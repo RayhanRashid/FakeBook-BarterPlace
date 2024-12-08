@@ -95,3 +95,4 @@ function updateCountdown() {
 	}
 }
 const countdownInterval = setInterval(updateCountdown, 1000);
+let we
