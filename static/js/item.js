@@ -6,6 +6,7 @@ var socket = io((isProduction ? 'wss://' : 'ws://') + window.location.host, {
 
 socket.on('connect', function() {
 	console.log('WebSocket connection established');
+
 });
 
 socket.on('connect_error', function(error) {
@@ -61,3 +62,8 @@ function placeBid() {
 	var itemId = document.getElementById('item-id').value;
 	socket.emit('place_bid', {item_id: itemId, bid_amount: bidAmount});
 }
+socket.on('timer_update', function(data) {
+	var timeRemaining = data.time_remaining;
+	// Update the timer display with the remaining time
+	document.getElementById('timer-display').innerText = `Time Remaining: ${timeRemaining} seconds`;
+});

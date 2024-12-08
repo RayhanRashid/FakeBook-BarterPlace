@@ -31,7 +31,7 @@
         <div id="highest-bid-section">
             <h2>Highest Bid: $<span id="highest-bid"> {{ highest_bid }} </span></h2>
         </div>
-
+        <h3>There are {{ remaining_time }} seconds left to place a bid</h3>
         <!-- Pop-up for new highest bid -->
         <div id="pop-up" style="display: none;">
             <div id="pop-up-content">
@@ -70,7 +70,7 @@
 
     </main>
 
-    </html>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA==" crossorigin="anonymous"></script>
     <script src="/static/js/item.js"></script>
 
