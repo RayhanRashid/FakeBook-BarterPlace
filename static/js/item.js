@@ -32,7 +32,8 @@ socket.on('new_highest_bid', function(data) {
 	// Update highest bid on page
 	var highestBidElement = document.getElementById('highest-bid');
 	highestBidElement.textContent = data.bid;
-
+	let HighestBidderElement = document.getElementById('highest-bidder');
+	HighestBidderElement.textContent = data.username
 	var bidderNameSpan = document.getElementById('bidder-name');
 	var bidAmountSpan = document.getElementById('bid-amount');
 
@@ -53,7 +54,7 @@ socket.on('new_bid', function(data) {
 	alert("Bid must be higher than current highest bid");
 });
 
-function placeBid() {
+function placeBid(username) {
 	var bidAmount = document.getElementById('bid-input').value;
 	let remainingTime = parseInt(document.getElementById('remaining-time').textContent);
 	if (remainingTime <= 0){
@@ -65,7 +66,7 @@ function placeBid() {
 			return;
 		}
 		var itemId = document.getElementById('item-id').value;
-		socket.emit('place_bid', {item_id: itemId, bid_amount: bidAmount});
+		socket.emit('place_bid', {item_id: itemId, bid_amount: bidAmount, bidder: username });
 	}
 
 }
@@ -93,6 +94,8 @@ function updateCountdown() {
 		remainingTimeElement.textContent = remainingTime.toString(); // Update the text content
 		console.log(parseInt(document.getElementById('remaining-time').textContent))
 	}
+	else{
+
+	}
 }
 const countdownInterval = setInterval(updateCountdown, 1000);
-let we
