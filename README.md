@@ -1,7 +1,6 @@
 # FakeBook-BarterPlace
-https://cse312barterplace.com/
+https://206.189.202.117
 A marketplace-esque website for CSE312
----NOT DEPLOYED---
 
 Project Part 3 Objective 3: Implemented a search bar at the top of the home page. Search through created posts by their 'item name' attribute.
 Objective 3 Testing Procedure: 
