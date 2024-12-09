@@ -3,7 +3,7 @@ services:
   app:
     build: .
     ports:
-      - "8312:5000"
+      - "8080:5000"
     depends_on:
       - mongo
     environment:

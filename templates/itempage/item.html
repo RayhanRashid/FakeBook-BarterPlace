@@ -29,9 +29,11 @@
 
     <main>
         <div id="highest-bid-section">
-            <h2>Highest Bid: $<span id="highest-bid"> {{ highest_bid }} </span></h2>
+            <h2>Highest Bid: $<span id="highest-bid"> {{ highest_bid }} </span> </h2>
+            <h2>Highest Bidder: <span id="highest-bidder"> {{ highest_bidder }}</span> </h2>
         </div>
 
+        <h3>There are <span id="remaining-time">{{ remaining_time }}</span> seconds left to place a bid</h3>
         <!-- Pop-up for new highest bid -->
         <div id="pop-up" style="display: none;">
             <div id="pop-up-content">
@@ -42,7 +44,8 @@
             </div>
         </div>
         <!-- End of pop-up -->
-
+        
+        
         <!--DISPLAY ITEM-->
         <div class="image-item">
             <img src="{{ url_for('static', filename=item['item_image'].replace('static/', '')) }}" alt="{{ item['item_name'] }}" id="item-button">
@@ -51,26 +54,27 @@
         </div>
         <!--DISPLAY ITEM-->
 
-
-        <!-- Bidding section -->
-        <div id="bid-section">
-            <div id="notification-container"></div>
-            {% if username %}
-                <h3>Enter Your Bid</h3>
-                <input type="hidden" id="item-id" value="{{ item['item_id'] }}">
-                <input type="number" id="bid-input" placeholder="Enter your bid" min="1" required>
-                <button type="button" id="place-bid-button" onclick="placeBid()">Place Bid</button>
-            {% else %}
-                <input type="hidden" id="item-id" value="{{ item['item_id'] }}">
-                <p>You need to <a href="/">log in</a> to place a bid.</p>
-            {% endif %}
-        </div>
-        <!-- End of bidding section -->
+        {% if remaining_time > 0 %}
+            <!-- Bidding section -->
+            <div id="bid-section">
+                <div id="notification-container"></div>
+                {% if username %}
+                    <h3>Enter Your Bid</h3>
+                    <input type="hidden" id="item-id" value="{{ item['item_id'] }}">
+                    <input type="number" id="bid-input" placeholder="Enter your bid" min="1" required>
+                    <button type="button" id="place-bid-button" onclick="placeBid('{{username}}')">Place Bid</button>
+                {% else %}
+                    <input type="hidden" id="item-id" value="{{ item['item_id'] }}">
+                    <p>You need to <a href="/">log in</a> to place a bid.</p>
+                {% endif %}
+            </div>
+            <!-- End of bidding section -->
+        {% endif %}
 
 
     </main>
 
-    </html>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA==" crossorigin="anonymous"></script>
     <script src="/static/js/item.js"></script>
 
