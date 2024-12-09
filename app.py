@@ -5,6 +5,7 @@ from flask import Flask, request, redirect, url_for, render_template, make_respo
 from flask_socketio import SocketIO, emit, join_room
 from pymongo import MongoClient
 from werkzeug.security import check_password_hash, generate_password_hash
+from werkzeug.middleware.proxy_fix import ProxyFix
 from werkzeug.utils import secure_filename
 from datetime import datetime, timedelta
 from collections import defaultdict
@@ -25,6 +26,7 @@ items_collection = db['itmes'] # Collection for storing item posts and likes
 bids_colletion = db['bids'] # Collection for storing items and their list of bids
 #client.drop_database('flask_auth')
 
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_host=1)
 RATE_LIMIT = 50
 WINDOW_SIZE = 10
 BLOCK_DURATION = 30
@@ -61,6 +63,7 @@ def is_rate_limited(ip):
 @app.before_request
 def rate_limit():
     ip = request.remote_addr
+    print(f"Client IP: {ip}")
 
     if is_rate_limited(ip):
         response = make_response(
