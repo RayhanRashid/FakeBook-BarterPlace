@@ -11,4 +11,4 @@ Objective 3 Testing Procedure:
 4. Create a couple of posts with different item name atributes
 5. Navigate to the search bar at the top of the home page
 6. Type in the search bar the exact item name of one of the items you posted
-7. Ensure that upon searching that exact item name, you are brought to that specific item's page where you can bid on that item.
+7. Ensure that upon searching, the items that contain the searched word in the name show up.
